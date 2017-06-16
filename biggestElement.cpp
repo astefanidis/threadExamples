@@ -2,6 +2,7 @@
 #include <thread>
 #include <vector>
 #include <cfloat>
+#include <time.h>
 
 #define NUM_THREADS 8
 
@@ -9,6 +10,7 @@ using namespace std;
 
 
 //function run by the thread
+/*
 void returnBiggestElement(vector<float> numbers, float* biggest)
 {
 	float maxNum = -FLT_MAX;
@@ -17,6 +19,21 @@ void returnBiggestElement(vector<float> numbers, float* biggest)
 		if(i>maxNum)
 		{
 			maxNum = i;
+		}
+	}
+	*biggest = maxNum;
+}
+*/
+
+
+void returnBiggestElement(vector<float> numbers, float* biggest, int start, int end)
+{
+	float maxNum = -FLT_MAX;
+	for(int i=start; i<end; i++)
+	{
+		if(numbers[i]>maxNum)
+		{
+			maxNum = numbers[i];
 		}
 	}
 	*biggest = maxNum;
@@ -52,13 +69,13 @@ float maxNumber(vector<float> &numbers)
 			remainderElements--;
 		}
 		
-		for(int j=start; j<end; j++)
+		/*for(int j=start; j<end; j++)
 		{
 			tempElements.push_back(numbers[j]);
 		}
+		*/
 		
-		
-		threads[i] = thread(returnBiggestElement,tempElements,&maxFromEachThread[i]);
+		threads[i] = thread(returnBiggestElement,numbers,&maxFromEachThread[i],start,end);
 		
 		start = end;
 	}
@@ -84,15 +101,35 @@ float maxNumber(vector<float> &numbers)
 	
 }
 
+float maxNumSer(vector<float> numbers)
+{
+	float biggest = -FLT_MAX;
+	for(auto i:numbers)
+	{
+		if(i > biggest)
+		{
+			biggest = i;
+		}
+	}
+	return biggest;
+}
 
 int main()
 {
-	vector<float> numbers(101);
+	vector<float> numbers(1000000000);
 	for(int i=0; i<numbers.size(); i++)
 	{
 		numbers[i] = i*i;
 	}
-	float maxNum = maxNumber(numbers);
-	cout << maxNum << endl;
+	float maxNum, maxNum2;
+	clock_t start = clock();
+	maxNum = maxNumber(numbers);
+	
+	
+	clock_t end1 = clock();
+	maxNum2 = maxNumSer(numbers);
+	clock_t end2 = clock();
+	cout << "serial: " << maxNum2 << " " << (float)(end2-end1)/CLOCKS_PER_SEC <<endl;
+	cout << "parallel: " << maxNum << " " << (float)(end1-start)/CLOCKS_PER_SEC <<endl;
 	return 0;
 }
